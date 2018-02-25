@@ -1,0 +1,14 @@
+ext {
+    minSdkVersion = 16
+    targetSdkVersion = 26
+
+    buildToolsVersion = '26.0.3'
+    gradleVersion = '3.0.1'
+    kotlinVersion = '1.2.0'
+
+    androidSupportVersion = '27.0.2'
+
+    jUnitVersion = '4.12'
+    testRunnerVersion = '1.0.1'
+    espressoVersion = '3.0.1'
+}
