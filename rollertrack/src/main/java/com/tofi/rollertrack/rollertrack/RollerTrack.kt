@@ -11,7 +11,7 @@ import android.view.View
 import com.tofi.rollertrack.R
 
 /**
- * Created by Derek on 28/03/2018.
+ * Created by Derek on 28/02/2018.
  * This view displays a vertical track of items that can roll forwards or backwards between the items. Usually
  * this will be used with another view that can scroll with the track, being updated as the other view scrolls.
  * The items can be any list of string values. As an item rolls from one to another, animations for shrinking
@@ -45,6 +45,9 @@ class RollerTrack @JvmOverloads constructor(context: Context,
 
         field = value
     }
+
+    // Invoked when a track item has been clicked
+    var onTrackItemClickAction: ((trackItem: RollerTrackItem<*>) -> Unit)? = null
 
     // List of area bounds of all the track items in this view
     private var trackItemPositions: Array<Rect>? = null
@@ -195,15 +198,16 @@ class RollerTrack @JvmOverloads constructor(context: Context,
 
             // Loop through all track item bounds to see if any have been clicked
             trackItemPositions?.let {
-                it.forEachIndexed { index, rect ->
-                    val trackItemPosition = it[index]
-
+                it.forEachIndexed { index, trackItemPosition ->
                     if (trackItemPosition.contains(event.x.toInt(), event.y.toInt() + paddingTop)) {
                         previousTrackItem = currentTrackItem
                         currentTrackItem = index
                         invalidate()
 
-                        //callback.onTrackItemClicked(it[index])
+                        val trackItems = this.trackItems
+                        if (trackItems != null) {
+                            onTrackItemClickAction?.invoke(trackItems[index])
+                        }
                     }
                 }
             }
