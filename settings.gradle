@@ -1,1 +1,1 @@
-include ':RollerTrack'
+include ':rollertrack', ':demo'

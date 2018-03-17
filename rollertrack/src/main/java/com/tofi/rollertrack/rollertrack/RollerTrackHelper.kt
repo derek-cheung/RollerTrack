@@ -2,14 +2,16 @@ package com.tofi.rollertrack.rollertrack
 
 import android.content.res.Configuration
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.LinearSmoothScroller
 import android.support.v7.widget.RecyclerView
 
 /**
  * Created by Derek on 04/03/2018.
  * Helper for pairing a [RollerTrack] with a [RecyclerView]. Monitors scrolling of the list and
  * updates the [RollerTrack] if needed. Also handles any clicks to the [RollerTrack].
+ * @param listItems The list of items used to populate the [RecyclerView] adapter.
  */
-class RollerTrackHelper<T>(var listItems: MutableList<T>) {
+class RollerTrackHelper<T>(private val listItems: List<T>) {
 
     companion object {
         private const val MINIMUM_TRACK_ITEMS_THRESHOLD = 5
@@ -20,9 +22,14 @@ class RollerTrackHelper<T>(var listItems: MutableList<T>) {
      */
     enum class DIRECTION { NEXT, PREVIOUS }
 
+    // RecyclerView elements
     private var recyclerView: RecyclerView? = null
+    private var layoutManager: LinearLayoutManager? = null
+    private var smoothScroller: LinearSmoothScroller? = null
+
+    // Roller track elements
     private var rollerTrack: RollerTrack? = null
-    private var trackItems: MutableList<RollerTrackItem<T>> = mutableListOf()
+    private var trackItems: List<RollerTrackItem<T>> = mutableListOf()
     private var currentTrackItem: RollerTrackItem<T>? = null
 
     // Keeps track of whether the list is scrolling due to a track item click rather than user dragging
@@ -31,13 +38,73 @@ class RollerTrackHelper<T>(var listItems: MutableList<T>) {
     // Keeps track of whether the roller track should be shown
     private var showRollerTrack: Boolean = false
 
+    // Monitors scrolling and notifies roller track of any updates needed
+    private val rollerTrackScrollListener = object: RecyclerView.OnScrollListener() {
+
+        // The previous item that was in focus
+        private var previousFirstVisibleItem: Int = 0
+
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+
+            // Don't process horizontal scrolls or any scrolls with no vertical change
+            if (dx > 0 || dy == 0) {
+                return
+            }
+
+            val firstVisibleItem = layoutManager?.findFirstCompletelyVisibleItemPosition() ?: 0
+            val lastVisibleItem = layoutManager?.findLastCompletelyVisibleItemPosition() ?: 0
+
+            /*
+             * If we have reached the end of the list, fire an event for the last view as the new focus.
+             * This is needed as the last view may never become focus if it cannot scroll high enough
+             * to be the first fully visible view.
+             */
+            if (lastVisibleItem >= 0 && lastVisibleItem == recyclerView.adapter.itemCount - 1) {
+                newItemFocus(lastVisibleItem)
+                previousFirstVisibleItem = lastVisibleItem
+
+            } else if (firstVisibleItem >= 0 && firstVisibleItem != previousFirstVisibleItem) {
+                newItemFocus(firstVisibleItem)
+                previousFirstVisibleItem = firstVisibleItem
+            }
+        }
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                clickScrolling = false
+            }
+        }
+    }
+
+    /**
+     * Attach this helper to [recyclerView].
+     * Currently only [LinearLayoutManager] with vertical scrolling is supported. The layout
+     * manager must be set on the [RecyclerView] before calling this.
+     * @param recyclerView The [RecyclerView] showing all the items [rollerTrack] is associated with
+     * @param rollerTrack The [RollerTrack] associated with the [RecyclerView]
+     * @param trackItems List of all [RollerTrackItem]s for the [rollerTrack]
+     */
     fun attachToRecyclerView(recyclerView: RecyclerView,
                              rollerTrack: RollerTrack,
-                             trackItems: MutableList<RollerTrackItem<T>>) {
+                             trackItems: List<RollerTrackItem<T>>) {
+
+        // Reset helper if attaching to a new RecyclerView
+        if (this.recyclerView != null && this.recyclerView != recyclerView) {
+            detachFromRecyclerView()
+            currentTrackItem = null
+            clickScrolling = false
+            showRollerTrack = false
+        }
+
         this.recyclerView = recyclerView
         this.rollerTrack = rollerTrack
         this.trackItems = trackItems
-        val layoutManager = recyclerView.layoutManager
+        val layoutManager = recyclerView.layoutManager ?: throw UnsupportedLayoutManagerException("Layout manager on RecyclerView must be set")
+
+        if (layoutManager !is LinearLayoutManager || layoutManager.orientation != LinearLayoutManager.VERTICAL) {
+            throw UnsupportedLayoutManagerException("Only LinearLayoutManager with vertical orientation is supported")
+        }
 
         showRollerTrack = trackItems.size >= MINIMUM_TRACK_ITEMS_THRESHOLD
                 && recyclerView.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
@@ -46,48 +113,35 @@ class RollerTrackHelper<T>(var listItems: MutableList<T>) {
             currentTrackItem = trackItems[0]
         }
 
-        if (layoutManager != null && layoutManager is LinearLayoutManager) {
+        if (showRollerTrack) {
+            this.layoutManager = layoutManager
 
-            recyclerView.addOnScrollListener(object: RecyclerView.OnScrollListener() {
-
-                // The previous item that was in focus
-                private var previousFirstVisibleItem: Int = 0
-
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    super.onScrolled(recyclerView, dx, dy)
-
-                    // Don't process horizontal scrolls or any scrolls with no vertical change
-                    if (dx > 0 || dy == 0) {
-                        return
-                    }
-
-                    val firstVisibleItem = layoutManager.findFirstCompletelyVisibleItemPosition()
-                    val lastVisibleItem = layoutManager.findLastCompletelyVisibleItemPosition()
-
-                    if (firstVisibleItem >= 0 && firstVisibleItem != previousFirstVisibleItem) {
-                        newItemFocus(firstVisibleItem)
-                        previousFirstVisibleItem = firstVisibleItem
-
-                        /*
-                         * If we have reached the end of the list, fire an event for the last view as the new focus.
-                         * This is needed as the last view may never become focus if it cannot scroll high enough
-                         * to be the first fully visible view.
-                         */
-                    } else if (lastVisibleItem >= 0 && lastVisibleItem == recyclerView.adapter.itemCount - 1) {
-                        newItemFocus(lastVisibleItem)
-                        previousFirstVisibleItem = lastVisibleItem
+            if (smoothScroller == null) {
+                smoothScroller = object: LinearSmoothScroller(recyclerView.context) {
+                    override fun getVerticalSnapPreference(): Int {
+                        return LinearSmoothScroller.SNAP_TO_END
                     }
                 }
+            }
 
-                override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        clickScrolling = false
-                    }
-                }
-            })
+            rollerTrack.trackItems = trackItems.toTypedArray()
 
+            recyclerView.addOnScrollListener(rollerTrackScrollListener)
             rollerTrack.onTrackItemClickAction = this::handleTrackItemClicked
         }
+    }
+
+    /**
+     * Call this if you need to manually detach this helper and any listeners from the
+     * [RecyclerView] and [RollerTrack]
+     */
+    fun detachFromRecyclerView() {
+        recyclerView?.removeOnScrollListener(rollerTrackScrollListener)
+        rollerTrack?.onTrackItemClickAction = null
+
+        recyclerView = null
+        layoutManager = null
+        rollerTrack = null
     }
 
     /**
@@ -109,24 +163,22 @@ class RollerTrackHelper<T>(var listItems: MutableList<T>) {
             }
 
             newFocusTrackGroup?.let {
-                /*
-                 * If the new item belongs to a new group, we check whether the group is before or
-                 * after the current group and update the track accordingly.
-                 */
-                if (it.trackItemName != currentTrackItem?.trackItemName) {
 
-                    when {
-                        // Roll to beginning of list
-                        itemPosition <= 0 -> setTrackGroup(0)
+                when {
+                    // Roll to beginning of list
+                    itemPosition <= 0 -> setTrackGroup(0)
 
-                        // Roll to end of list
-                        itemPosition >= recyclerView?.adapter?.itemCount ?: 0 -> setTrackGroup(trackItems.size - 1)
+                    // Roll to end of list
+                    itemPosition >= listItems.size - 1 -> setTrackGroup(trackItems.size - 1)
 
-                        else -> updateTrackGroup(this@RollerTrackHelper.getNextTrackItemPosition(it))
-                    }
-
-                    currentTrackItem = newFocusTrackGroup
+                    /*
+                     * If the new item belongs to a new group, we check whether the group is before
+                     * or after the current group and update the track accordingly.
+                     */
+                    it.trackItemName != currentTrackItem?.trackItemName -> updateTrackGroup(this@RollerTrackHelper.getNextTrackItemPosition(it))
                 }
+
+                currentTrackItem = newFocusTrackGroup
             }
         }
     }
@@ -184,7 +236,8 @@ class RollerTrackHelper<T>(var listItems: MutableList<T>) {
             val itemToScrollTo = trackItem.trackItemData[0]
             clickScrolling = true
             currentTrackItem = trackItem as RollerTrackItem<T>
-            recyclerView?.smoothScrollToPosition(listItems.indexOf(itemToScrollTo))
+            smoothScroller?.targetPosition = listItems.indexOf(itemToScrollTo)
+            layoutManager?.startSmoothScroll(smoothScroller)
         }
     }
 }

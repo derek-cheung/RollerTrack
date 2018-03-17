@@ -17,6 +17,7 @@ local.properties
 .idea/
 RollerTrack.iml
 rollertrack/app.iml
+demo.iml
 
 gradle.properties
 .gradle/

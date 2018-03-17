@@ -38,8 +38,9 @@ class RollerTrack @JvmOverloads constructor(context: Context,
     // List of all items to be placed in the track
     var trackItems: Array<RollerTrackItem<*>>? = null
     set(value) {
-        if (value != null) {
+        if (value != null && value.isNotEmpty()) {
             trackItemPositions = Array(value.size, { Rect() })
+            currentTrackItem = 0
             measureTrackItemTextBounds(value[0].trackItemName)
         }
 
@@ -138,8 +139,8 @@ class RollerTrack @JvmOverloads constructor(context: Context,
              * startHeight = the height to start drawing a track item at
              */
             val dataSize = it.size
-            val singleHeight = (trackHeight - paddingBottom) / dataSize
-            var startHeight = paddingTop
+            val singleHeight = (trackHeight - paddingTop - paddingBottom) / dataSize
+            var startHeight = paddingTop + (singleHeight / 4)
 
             for (i in 0 until dataSize) {
                 val trackItemSizeChangeAnimator = this.trackItemSizeChangeAnimator
@@ -278,10 +279,7 @@ class RollerTrack @JvmOverloads constructor(context: Context,
      */
     private fun measureTrackItemTextBounds(trackItem: String) {
         trackItemPaint.getTextBounds(trackItem, 0, trackItem.length, trackItemTextBounds)
-
-        if (backgroundTextHeight < 0) {
-            backgroundTextHeight = trackItemTextBounds.height()
-        }
+        backgroundTextHeight = trackItemTextBounds.height()
     }
 
     /**
