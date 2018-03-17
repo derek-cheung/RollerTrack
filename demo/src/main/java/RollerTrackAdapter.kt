@@ -6,9 +6,9 @@ import android.view.ViewGroup
 
 /**
  * Created by Derek on 10/03/2018.
- * Demo adapter for displaying a list of [TrackItem].
+ * Demo adapter for displaying a list of [DemoTrackItem].
  */
-class RollerTrackAdapter(private val trackItems: List<TrackItem>): RecyclerView.Adapter<TrackItemViewHolder>() {
+class RollerTrackAdapter(private val trackItems: List<DemoTrackItem>): RecyclerView.Adapter<TrackItemViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackItemViewHolder {
         val inflater = LayoutInflater.from(parent.context)

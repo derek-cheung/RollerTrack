@@ -9,9 +9,8 @@ import android.support.v7.widget.RecyclerView
  * Created by Derek on 04/03/2018.
  * Helper for pairing a [RollerTrack] with a [RecyclerView]. Monitors scrolling of the list and
  * updates the [RollerTrack] if needed. Also handles any clicks to the [RollerTrack].
- * @param listItems The list of items used to populate the [RecyclerView] adapter.
  */
-class RollerTrackHelper<T>(private val listItems: List<T>) {
+abstract class RollerTrackHelper<T> {
 
     companion object {
         private const val MINIMUM_TRACK_ITEMS_THRESHOLD = 5
@@ -26,6 +25,7 @@ class RollerTrackHelper<T>(private val listItems: List<T>) {
     private var recyclerView: RecyclerView? = null
     private var layoutManager: LinearLayoutManager? = null
     private var smoothScroller: LinearSmoothScroller? = null
+    private var listItems: MutableList<T> = mutableListOf()
 
     // Roller track elements
     private var rollerTrack: RollerTrack? = null
@@ -78,16 +78,21 @@ class RollerTrackHelper<T>(private val listItems: List<T>) {
     }
 
     /**
+     * Override this to create the list of [RollerTrackItem]s
+     */
+    abstract protected fun generateRollerTrackItems(listItems: List<T>): MutableList<RollerTrackItem<T>>
+
+    /**
      * Attach this helper to [recyclerView].
      * Currently only [LinearLayoutManager] with vertical scrolling is supported. The layout
      * manager must be set on the [RecyclerView] before calling this.
      * @param recyclerView The [RecyclerView] showing all the items [rollerTrack] is associated with
      * @param rollerTrack The [RollerTrack] associated with the [RecyclerView]
-     * @param trackItems List of all [RollerTrackItem]s for the [rollerTrack]
+     * @param listItems The list of items used to populate the [RecyclerView] adapter.
      */
     fun attachToRecyclerView(recyclerView: RecyclerView,
                              rollerTrack: RollerTrack,
-                             trackItems: List<RollerTrackItem<T>>) {
+                             listItems: List<T>) {
 
         // Reset helper if attaching to a new RecyclerView
         if (this.recyclerView != null && this.recyclerView != recyclerView) {
@@ -99,7 +104,9 @@ class RollerTrackHelper<T>(private val listItems: List<T>) {
 
         this.recyclerView = recyclerView
         this.rollerTrack = rollerTrack
-        this.trackItems = trackItems
+        this.listItems.clear()
+        this.listItems.addAll(listItems)
+        this.trackItems = generateRollerTrackItems(listItems)
         val layoutManager = recyclerView.layoutManager ?: throw UnsupportedLayoutManagerException("Layout manager on RecyclerView must be set")
 
         if (layoutManager !is LinearLayoutManager || layoutManager.orientation != LinearLayoutManager.VERTICAL) {

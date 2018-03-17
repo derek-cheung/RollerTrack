@@ -6,11 +6,11 @@ import kotlinx.android.synthetic.main.roller_track_row.view.*
 
 /**
  * Created by Derek on 10/03/2018.
- * Displays a single [TrackItem] in a list.
+ * Displays a single [DemoTrackItem] in a list.
  */
 class TrackItemViewHolder(rootView: View): RecyclerView.ViewHolder(rootView) {
 
-    fun bindData(trackItem: TrackItem) {
+    fun bindData(trackItem: DemoTrackItem) {
         itemView.text_title.text = trackItem.title
         itemView.text_description.text = trackItem.description
     }
