@@ -126,7 +126,7 @@ abstract class RollerTrackHelper<T> {
             if (smoothScroller == null) {
                 smoothScroller = object: LinearSmoothScroller(recyclerView.context) {
                     override fun getVerticalSnapPreference(): Int {
-                        return LinearSmoothScroller.SNAP_TO_END
+                        return LinearSmoothScroller.SNAP_TO_START
                     }
                 }
             }
