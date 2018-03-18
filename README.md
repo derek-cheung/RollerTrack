@@ -6,7 +6,7 @@ are a catalogue of items grouped alphabetically or a list of events grouped by s
 ## Usage
 Start by adding your `RecyclerView` and `RollerTrack` to your layout file. You are free to position these however you want.
 
-```
+```kotlin
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
@@ -35,7 +35,7 @@ Start by adding your `RecyclerView` and `RollerTrack` to your layout file. You a
 
 Next have your data model implement `AlphabeticalTrackItem`
 
-```
+```kotlin
 data class DemoTrackItem(var title: String = "",
                          var description: String = ""): AlphabeticalTrackItem {
 
@@ -45,7 +45,7 @@ data class DemoTrackItem(var title: String = "",
 
 Then sort your list of items, set up your `RecyclerView` normally and attach it to an `AlphabeticalTrackRollerHelper`
 
-```
+```kotlin
 val trackItems: List<DemoTrackItem> = loadTrackItems().sortedBy { it.title }
 
 val adapter = RollerTrackAdapter(trackItems)
@@ -60,7 +60,7 @@ rollerTrackHelper.attachToRecyclerView(list_track_items, roller_track, trackItem
 
 If you wish to create your own list of `RollerTrackItem`s, just extend `RollerTrackHelper` and return your own items in `generateRollerTrackItems`.
 
-```
+```kotlin
 class CityRollerTrackHelper: RollerTrackHelper<City>() {
 
     override fun generateRollerTrackItems(listItems: List<City>): MutableList<RollerTrackItem<City>> {
