@@ -57,3 +57,38 @@ list_track_items.layoutManager = layoutManager
 val rollerTrackHelper: AlphabeticalRollerTrackHelper<DemoTrackItem> = AlphabeticalRollerTrackHelper()
 rollerTrackHelper.attachToRecyclerView(list_track_items, roller_track, trackItems)
 ```
+
+If you wish to create your own list of `RollerTrackItem`s, just extend `RollerTrackHelper` and return your own items in `generateRollerTrackItems`.
+
+```
+class CityRollerTrackHelper: RollerTrackHelper<City>() {
+
+    override fun generateRollerTrackItems(listItems: List<City>): MutableList<RollerTrackItem<City>> {
+        val rollerTrackItems = mutableListOf<RollerTrackItem<City>>()
+
+        var currentRollerTrackItemData: MutableList<City> = mutableListOf()
+        var currentRollerTrackItem: RollerTrackItem<City> = RollerTrackItem("", currentRollerTrackItemData)
+        listItems.forEach {
+            val countryCode = it.countryCode
+            
+            if (currentRollerTrackItem.trackItemName != countryCode) {
+                currentRollerTrackItemData = mutableListOf()
+                currentRollerTrackItemData.add(it)
+                currentRollerTrackItem = RollerTrackItem(countryCode, currentRollerTrackItemData)
+                rollerTrackItems.add(currentRollerTrackItem)
+
+            } else {
+                currentRollerTrackItemData.add(it)
+            }
+        }
+
+        return rollerTrackItems
+    }
+}
+```
+
+## Demo
+A demo is provided under the `demo` module. Clone this repo and run the demo app to see it in action.
+
+## License
+Provided with MIT license. See [LICENSE](LICENSE.md) for full details.
