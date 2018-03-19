@@ -1,7 +1,8 @@
 # RollerTrack
 This library allows attaching a roller track to a RecyclerView. The roller track provides faster navigation and visualisation for users 
-facing long lists. It is designed to work with sorted lists of related content with fixed, pre-determined datasets. Example good use cases
-are a catalogue of items grouped alphabetically or a list of events grouped by starting time.
+facing long lists. It is designed to work with sorted lists of related content with fixed, pre-determined datasets. Example good use cases are a catalogue of items grouped alphabetically or a list of events grouped by starting time.
+
+![](media/roller_track.gif)
 
 ## Usage
 Start by adding your `RecyclerView` and `RollerTrack` to your layout file. You are free to position these however you want.
@@ -86,6 +87,28 @@ class CityRollerTrackHelper: RollerTrackHelper<City>() {
     }
 }
 ```
+
+## Customisation
+You can customise the appearance of the `RollerTrack` with xml styling. 
+
+```kotlin
+<com.tofi.rollertrack.rollertrack.RollerTrack
+        xmlns:demo="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/roller_track"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.2"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        demo:rollerTrackTrackLineColor="#FF5722"
+        demo:rollerTrackTextColor="#4CAF50"
+        demo:rollerTrackCurrentItemTextSize="40sp"
+        demo:rollerTrackBackgroundItemTextSize="10sp"/>
+```
+
+![](media/roller_track_custom.jpg)
 
 ## Demo
 A demo is provided under the `demo` module. Clone this repo and run the demo app to see it in action.
