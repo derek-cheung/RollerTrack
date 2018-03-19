@@ -4,6 +4,24 @@ facing long lists. It is designed to work with sorted lists of related content w
 
 ![](media/roller_track.gif)
 
+## Gradle Setup
+Add Jitpack to your project
+
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+    jcenter()
+}
+```
+
+Then add this library to your dependencies
+
+```groovy
+dependencies {
+    compile 'com.github.derek-cheung:RollerTrack:v0.1.0-beta'
+}
+```
+
 ## Usage
 Start by adding your `RecyclerView` and `RollerTrack` to your layout file. You are free to position these however you want.
 
