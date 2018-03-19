@@ -2,6 +2,7 @@ package com.tofi.rollertrack.rollertrack
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.res.TypedArray
 import android.graphics.*
 import android.os.Bundle
 import android.os.Parcelable
@@ -60,8 +61,8 @@ class RollerTrack @JvmOverloads constructor(context: Context,
     // Objects for styling the view elements
     private var trackPaint = Paint()
     private var trackItemPaint = Paint()
-    private var currentTrackItemTextStyle = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-    private var backgroundTrackItemTextStyle = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+    var currentTrackItemTextTypeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+    var backgroundTrackItemTextTypeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
 
     // Calculated text bounds for a track item
     private var trackItemTextBounds = Rect()
@@ -100,6 +101,8 @@ class RollerTrack @JvmOverloads constructor(context: Context,
 
         currentTrackItemTextSize = resources.getDimensionPixelOffset(R.dimen.default_current_track_item_text_size)
         backgroundTrackItemTextSize = resources.getDimensionPixelOffset(R.dimen.default_background_track_item_text_size)
+
+        readStyledAttributes(context.obtainStyledAttributes(attributes, R.styleable.RollerTrack, defStyle, 0))
     }
 
     override fun onSaveInstanceState(): Parcelable {
@@ -159,7 +162,7 @@ class RollerTrack @JvmOverloads constructor(context: Context,
                         trackItemPaint.textSize = currentTrackItemTextSize.toFloat()
                     }
 
-                    trackItemPaint.typeface = currentTrackItemTextStyle
+                    trackItemPaint.typeface = currentTrackItemTextTypeface
                     measureTrackItemTextBounds(data)
                     height += (trackItemTextBounds.height() - backgroundTextHeight) / 2
 
@@ -176,7 +179,7 @@ class RollerTrack @JvmOverloads constructor(context: Context,
                         trackItemPaint.textSize = backgroundTrackItemTextSize.toFloat()
                     }
 
-                    trackItemPaint.typeface = backgroundTrackItemTextStyle
+                    trackItemPaint.typeface = backgroundTrackItemTextTypeface
                     measureTrackItemTextBounds(data)
                 }
 
@@ -290,5 +293,18 @@ class RollerTrack @JvmOverloads constructor(context: Context,
         trackItemSizeChangeAnimator?.duration = DEFAULT_ANIMATION_DURATION.toLong()
         trackItemSizeChangeAnimator?.addUpdateListener({ invalidate() })
         trackItemSizeChangeAnimator?.start()
+    }
+
+    private fun readStyledAttributes(array: TypedArray?) {
+        array?.let {
+            trackPaint.color = it.getColor(R.styleable.RollerTrack_rollerTrackTrackLineColor, Color.BLACK)
+            trackItemPaint.color = it.getColor(R.styleable.RollerTrack_rollerTrackTextColor, Color.RED)
+            currentTrackItemTextSize = it.getDimensionPixelOffset(R.styleable.RollerTrack_rollerTrackCurrentItemTextSize,
+                    resources.getDimensionPixelOffset(R.dimen.default_current_track_item_text_size))
+            backgroundTrackItemTextSize = it.getDimensionPixelOffset(R.styleable.RollerTrack_rollerTrackBackgroundItemTextSize,
+                    resources.getDimensionPixelOffset(R.dimen.default_background_track_item_text_size))
+
+            it.recycle()
+        }
     }
 }

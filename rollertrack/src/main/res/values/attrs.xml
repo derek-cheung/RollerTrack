@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="RollerTrack">
+        <attr name="rollerTrackTrackLineColor" format="color"/>
+        <attr name="rollerTrackTextColor" format="color"/>
+        <attr name="rollerTrackCurrentItemTextSize" format="dimension"/>
+        <attr name="rollerTrackBackgroundItemTextSize" format="dimension"/>
+    </declare-styleable>
+
+</resources>

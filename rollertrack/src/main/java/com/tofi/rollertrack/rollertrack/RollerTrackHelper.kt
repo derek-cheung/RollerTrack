@@ -4,13 +4,17 @@ import android.content.res.Configuration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.LinearSmoothScroller
 import android.support.v7.widget.RecyclerView
+import android.view.View
 
 /**
  * Created by Derek on 04/03/2018.
  * Helper for pairing a [RollerTrack] with a [RecyclerView]. Monitors scrolling of the list and
  * updates the [RollerTrack] if needed. Also handles any clicks to the [RollerTrack].
+ *
+ * @param minimumNumberOfTrackItems The minimum number of [RollerTrackItem]s that are needed for
+ * the [RollerTrack] to show.
  */
-abstract class RollerTrackHelper<T> {
+abstract class RollerTrackHelper<T>(private val minimumNumberOfTrackItems: Int = MINIMUM_TRACK_ITEMS_THRESHOLD) {
 
     companion object {
         private const val MINIMUM_TRACK_ITEMS_THRESHOLD = 5
@@ -113,7 +117,7 @@ abstract class RollerTrackHelper<T> {
             throw UnsupportedLayoutManagerException("Only LinearLayoutManager with vertical orientation is supported")
         }
 
-        showRollerTrack = trackItems.size >= MINIMUM_TRACK_ITEMS_THRESHOLD
+        showRollerTrack = trackItems.size >= minimumNumberOfTrackItems
                 && recyclerView.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
         if (trackItems.isNotEmpty()) {
@@ -132,9 +136,12 @@ abstract class RollerTrackHelper<T> {
             }
 
             rollerTrack.trackItems = trackItems.toTypedArray()
-
             recyclerView.addOnScrollListener(rollerTrackScrollListener)
             rollerTrack.onTrackItemClickAction = this::handleTrackItemClicked
+            rollerTrack.visibility = View.VISIBLE
+
+        } else {
+            rollerTrack.visibility = View.GONE
         }
     }
 
