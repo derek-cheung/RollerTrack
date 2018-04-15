@@ -18,7 +18,7 @@ Then add this library to your dependencies
 
 ```groovy
 dependencies {
-    compile 'com.github.derek-cheung:RollerTrack:v0.1.0-beta'
+    compile 'com.github.derek-cheung:RollerTrack:v1.0.0'
 }
 ```
 
@@ -121,7 +121,8 @@ You can customise the appearance of the `RollerTrack` with xml styling.
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         demo:rollerTrackTrackLineColor="#FF5722"
-        demo:rollerTrackTextColor="#4CAF50"
+        demo:rollerTrackCurrentTextColor="#4CAF50"
+        demo:rollerTrackBackgroundTextColor="#4CAF50"
         demo:rollerTrackCurrentItemTextSize="40sp"
         demo:rollerTrackBackgroundItemTextSize="10sp"/>
 ```
