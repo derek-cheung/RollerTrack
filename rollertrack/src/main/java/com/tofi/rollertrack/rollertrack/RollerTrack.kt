@@ -83,6 +83,10 @@ class RollerTrack @JvmOverloads constructor(context: Context,
     private var currentTrackItemTextSize: Int = 0
     private var backgroundTrackItemTextSize: Int = 0
 
+    // Colors for painting the track item text
+    private var currentTrackItemTextColor: Int = Color.RED
+    private var backgroundTrackItemTextColor: Int = Color.RED
+
     // Amount of horizontal padding for the inside track
     private var insideTracksHorizontalPadding: Int = 0
 
@@ -101,7 +105,6 @@ class RollerTrack @JvmOverloads constructor(context: Context,
         trackItemPaint.isAntiAlias = true
         trackItemPaint.strokeWidth = DEFAULT_TEXT_STROKE_WIDTH.toFloat()
         trackItemPaint.textSize = backgroundTrackItemTextSize.toFloat()
-        trackItemPaint.color = Color.RED
         trackItemPaint.textAlign = Paint.Align.CENTER
 
         currentTrackItemTextSize = resources.getDimensionPixelOffset(R.dimen.default_current_track_item_text_size)
@@ -174,6 +177,7 @@ class RollerTrack @JvmOverloads constructor(context: Context,
                         trackItemPaint.textSize = currentTrackItemTextSize.toFloat()
                     }
 
+                    trackItemPaint.color = currentTrackItemTextColor
                     trackItemPaint.typeface = currentTrackItemTextTypeface
                     data = measureTrackItemTextBounds(data)
                     height += (trackItemTextBounds.height() - backgroundTextHeight) / 2
@@ -191,6 +195,7 @@ class RollerTrack @JvmOverloads constructor(context: Context,
                         trackItemPaint.textSize = backgroundTrackItemTextSize.toFloat()
                     }
 
+                    trackItemPaint.color = backgroundTrackItemTextColor
                     trackItemPaint.typeface = backgroundTrackItemTextTypeface
                     data = measureTrackItemTextBounds(data)
                 }
@@ -329,7 +334,8 @@ class RollerTrack @JvmOverloads constructor(context: Context,
     private fun readStyledAttributes(array: TypedArray?) {
         array?.let {
             trackPaint.color = it.getColor(R.styleable.RollerTrack_rollerTrackTrackLineColor, Color.BLACK)
-            trackItemPaint.color = it.getColor(R.styleable.RollerTrack_rollerTrackTextColor, Color.RED)
+            currentTrackItemTextColor = it.getColor(R.styleable.RollerTrack_rollerTrackCurrentTextColor, Color.RED)
+            backgroundTrackItemTextColor = it.getColor(R.styleable.RollerTrack_rollerTrackBackgroundTextColor, Color.RED)
             currentTrackItemTextSize = it.getDimensionPixelOffset(R.styleable.RollerTrack_rollerTrackCurrentItemTextSize,
                     resources.getDimensionPixelOffset(R.dimen.default_current_track_item_text_size))
             backgroundTrackItemTextSize = it.getDimensionPixelOffset(R.styleable.RollerTrack_rollerTrackBackgroundItemTextSize,

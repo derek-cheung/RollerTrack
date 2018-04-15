@@ -3,7 +3,8 @@
 
     <declare-styleable name="RollerTrack">
         <attr name="rollerTrackTrackLineColor" format="color"/>
-        <attr name="rollerTrackTextColor" format="color"/>
+        <attr name="rollerTrackCurrentTextColor" format="color"/>
+        <attr name="rollerTrackBackgroundTextColor" format="color"/>
         <attr name="rollerTrackCurrentItemTextSize" format="dimension"/>
         <attr name="rollerTrackBackgroundItemTextSize" format="dimension"/>
     </declare-styleable>
