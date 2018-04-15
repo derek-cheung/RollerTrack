@@ -11,6 +11,8 @@ import android.view.View
  * Helper for pairing a [RollerTrack] with a [RecyclerView]. Monitors scrolling of the list and
  * updates the [RollerTrack] if needed. Also handles any clicks to the [RollerTrack].
  *
+ * [RollerTrack] will only show for portrait orientation.
+ *
  * @param minimumNumberOfTrackItems The minimum number of [RollerTrackItem]s that are needed for
  * the [RollerTrack] to show.
  */

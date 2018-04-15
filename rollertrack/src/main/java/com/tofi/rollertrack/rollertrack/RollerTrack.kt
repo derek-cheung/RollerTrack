@@ -27,8 +27,10 @@ class RollerTrack @JvmOverloads constructor(context: Context,
 
         private const val INVALID_TRACK_ITEM = -1
 
-        val CURRENT_TRACK_ITEM_KEY = "CurrentTrackItem"
-        val PREVIOUS_TRACK_ITEM_KEY = "PreviousTrackItem"
+        // Keys for saving and restoring state
+        private const val SAVED_STATE_KEY = "SavedState"
+        private const val CURRENT_TRACK_ITEM_KEY = "CurrentTrackItem"
+        private const val PREVIOUS_TRACK_ITEM_KEY = "PreviousTrackItem"
 
         // Default values for this view
         private const val DEFAULT_TRACK_STROKE_WIDTH = 6
@@ -106,16 +108,21 @@ class RollerTrack @JvmOverloads constructor(context: Context,
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        super.onSaveInstanceState()
         val savedState = Bundle()
+        savedState.putParcelable(SAVED_STATE_KEY, super.onSaveInstanceState())
         savedState.putInt(CURRENT_TRACK_ITEM_KEY, currentTrackItem)
         savedState.putInt(PREVIOUS_TRACK_ITEM_KEY, previousTrackItem)
         return savedState
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
-        previousTrackItem = (state as Bundle).getInt(PREVIOUS_TRACK_ITEM_KEY)
-        currentTrackItem = state.getInt(CURRENT_TRACK_ITEM_KEY)
+        if (state is Bundle) {
+            previousTrackItem = state.getInt(PREVIOUS_TRACK_ITEM_KEY)
+            currentTrackItem = state.getInt(CURRENT_TRACK_ITEM_KEY)
+            super.onRestoreInstanceState(state.getParcelable(SAVED_STATE_KEY))
+            return
+        }
+
         super.onRestoreInstanceState(state)
     }
 
