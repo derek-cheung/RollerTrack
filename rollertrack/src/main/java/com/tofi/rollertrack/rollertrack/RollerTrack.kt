@@ -83,6 +83,9 @@ class RollerTrack @JvmOverloads constructor(context: Context,
     private var currentTrackItemTextSize: Int = 0
     private var backgroundTrackItemTextSize: Int = 0
 
+    // Amount of horizontal padding for the inside track
+    private var insideTracksHorizontalPadding: Int = 0
+
     private val trackItemSizeDifference: Int
     get() { return currentTrackItemTextSize - backgroundTrackItemTextSize }
 
@@ -103,6 +106,8 @@ class RollerTrack @JvmOverloads constructor(context: Context,
 
         currentTrackItemTextSize = resources.getDimensionPixelOffset(R.dimen.default_current_track_item_text_size)
         backgroundTrackItemTextSize = resources.getDimensionPixelOffset(R.dimen.default_background_track_item_text_size)
+
+        insideTracksHorizontalPadding = resources.getDimensionPixelOffset(R.dimen.inside_tracks_horizontal_padding)
 
         readStyledAttributes(context.obtainStyledAttributes(attributes, R.styleable.RollerTrack, defStyle, 0))
     }
@@ -154,7 +159,7 @@ class RollerTrack @JvmOverloads constructor(context: Context,
 
             for (i in 0 until dataSize) {
                 val trackItemSizeChangeAnimator = this.trackItemSizeChangeAnimator
-                val data = it[i].trackItemName
+                var data = it[i].trackItemName
                 var height = startHeight + singleHeight / 2
 
                 if (i == currentTrackItem) {
@@ -170,7 +175,7 @@ class RollerTrack @JvmOverloads constructor(context: Context,
                     }
 
                     trackItemPaint.typeface = currentTrackItemTextTypeface
-                    measureTrackItemTextBounds(data)
+                    data = measureTrackItemTextBounds(data)
                     height += (trackItemTextBounds.height() - backgroundTextHeight) / 2
 
                 } else {
@@ -187,7 +192,7 @@ class RollerTrack @JvmOverloads constructor(context: Context,
                     }
 
                     trackItemPaint.typeface = backgroundTrackItemTextTypeface
-                    measureTrackItemTextBounds(data)
+                    data = measureTrackItemTextBounds(data)
                 }
 
                 canvas.drawText(data, (trackWidth / 2).toFloat(), height.toFloat(), trackItemPaint)
@@ -284,12 +289,31 @@ class RollerTrack @JvmOverloads constructor(context: Context,
     }
 
     /**
-     * Measure and store the text bounds of a track item
+     * Measures the bounds of [trackItem]. If the text does not fit within the bounds of this
+     * [RollerTrack], chars will be dropped from the end of [trackItem] until it fits.
      * @param trackItem The track item to measure
+     * @return The longest substring of [trackItem] that will fit
      */
-    private fun measureTrackItemTextBounds(trackItem: String) {
-        trackItemPaint.getTextBounds(trackItem, 0, trackItem.length, trackItemTextBounds)
-        backgroundTextHeight = trackItemTextBounds.height()
+    private fun measureTrackItemTextBounds(trackItem: String): String {
+        val drawingWidth = trackWidth - paddingLeft - paddingRight - (insideTracksHorizontalPadding * 2)
+        var textToMeasure = trackItem
+        var textFitsInBounds = false
+
+        while (!textFitsInBounds) {
+            trackItemPaint.getTextBounds(textToMeasure, 0, textToMeasure.length, trackItemTextBounds)
+
+            if (trackItemTextBounds.width() <= drawingWidth) {
+                backgroundTextHeight = trackItemTextBounds.height()
+                textFitsInBounds = true
+
+            } else {
+
+                if (textToMeasure.isEmpty()) { break }
+                textToMeasure = textToMeasure.dropLast(1)
+            }
+        }
+
+        return textToMeasure
     }
 
     /**
