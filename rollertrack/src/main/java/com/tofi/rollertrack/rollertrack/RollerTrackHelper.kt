@@ -66,7 +66,7 @@ abstract class RollerTrackHelper<T>(private val minimumNumberOfTrackItems: Int =
              * This is needed as the last view may never become focus if it cannot scroll high enough
              * to be the first fully visible view.
              */
-            if (lastVisibleItem >= 0 && lastVisibleItem == recyclerView.adapter.itemCount - 1) {
+            if (lastVisibleItem >= 0 && lastVisibleItem == recyclerView.adapter?.itemCount ?: 0 - 1) {
                 newItemFocus(lastVisibleItem)
                 previousFirstVisibleItem = lastVisibleItem
 
@@ -76,7 +76,7 @@ abstract class RollerTrackHelper<T>(private val minimumNumberOfTrackItems: Int =
             }
         }
 
-        override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 clickScrolling = false
             }
